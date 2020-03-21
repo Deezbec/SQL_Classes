@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "unkCPo1D0eXLJyEADLCaGalZSgTgSVAc/rilaQ2UzxdEtY/2NtnxzpvJGKuy3GEKrji/K2jsj/lSz0qQDBZBhg==",
+  "success": true,
+  "projectFilePath": "C:\\User\\!Kirill\\SQL_Classes\\SQL\\SQL\\SQL.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\grege\\.nuget\\packages\\system.data.sqlite\\1.0.112\\system.data.sqlite.1.0.112.nupkg.sha512",
+    "C:\\Users\\grege\\.nuget\\packages\\system.data.sqlite.core\\1.0.112\\system.data.sqlite.core.1.0.112.nupkg.sha512"
+  ],
+  "logs": []
+}
