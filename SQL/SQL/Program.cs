@@ -8,13 +8,13 @@ namespace SQL
     {
         static void Main(string[] args)
         {
-            if (!File.Exists(@"C:\User\!Kirill\SQL_Classes\Test.db"))
+            if (!File.Exists(@"C:\User\!Kirill\GitHub\SQL_Classes\Test.db"))
             {
-                SQLiteConnection.CreateFile(@"C:\User\!Kirill\SQL_Classes\Test.db");
+                SQLiteConnection.CreateFile(@"C:\User\!Kirill\GitHub\SQL_Classes\Test.db");
                 Console.WriteLine("Создана БД");
             }
             else Console.WriteLine("БД уже создана");
-            SQLiteConnection connect = new SQLiteConnection(@"Data Source=C:\User\!Kirill\SQL_Classes\Test.db; Version=3;");
+            SQLiteConnection connect = new SQLiteConnection(@"Data Source=C:\User\!Kirill\GitHub\SQL_Classes\Test.db; Version=3;");
             connect.Open();
 
             SQLiteCommand comandSQL;

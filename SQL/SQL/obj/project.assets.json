@@ -109,11 +109,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\User\\!Kirill\\SQL_Classes\\SQL\\SQL\\SQL.csproj",
+      "projectUniqueName": "C:\\User\\!Kirill\\GitHub\\SQL_Classes\\SQL\\SQL\\SQL.csproj",
       "projectName": "SQL",
-      "projectPath": "C:\\User\\!Kirill\\SQL_Classes\\SQL\\SQL\\SQL.csproj",
+      "projectPath": "C:\\User\\!Kirill\\GitHub\\SQL_Classes\\SQL\\SQL\\SQL.csproj",
       "packagesPath": "C:\\Users\\grege\\.nuget\\packages\\",
-      "outputPath": "C:\\User\\!Kirill\\SQL_Classes\\SQL\\SQL\\obj\\",
+      "outputPath": "C:\\User\\!Kirill\\GitHub\\SQL_Classes\\SQL\\SQL\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\grege\\AppData\\Roaming\\NuGet\\NuGet.Config",
