@@ -10,7 +10,6 @@ namespace Bank
         static void AllOutput(SQLiteConnection connect)
         {
             SQLiteCommand comandSQL;
-            connect.Open();
             comandSQL = new SQLiteCommand("SELECT * FROM BankAccounts", connect);
             SQLiteDataReader reader = comandSQL.ExecuteReader();
             while (reader.Read())
@@ -22,7 +21,6 @@ Password :   {reader["Password"]}
 Money    :   {reader["Money"]}");
             }
             reader.Close();
-            connect.Close();
         }
         static void Log(SQLiteConnection connect, ref string Login)
         {
@@ -30,7 +28,6 @@ Money    :   {reader["Money"]}");
             SQLiteCommand comandSQL;
             SQLiteDataReader reader;
             bool Log = false, Pas = false;
-            connect.Open();
             do
             {
                 try
@@ -63,9 +60,9 @@ Money    :   {reader["Money"]}");
                 }
             }
             while (Pas || !Log);
-            connect.Close();
+            ;
         }
-        static string[] InfInput()
+        static string[] InfInput(SQLiteConnection connect)
         {
             string[] information;
             try
@@ -76,13 +73,16 @@ Money    :   {reader["Money"]}");
                 information = Console.ReadLine().Split();
                 if (information.Length != 3) throw new Exception("Было введено не 3 значения");
                 if (!Int32.TryParse(information[2], out int x)) throw new Exception("Счёт не может состоять из букв");
+                SQLiteCommand comandSQL = new SQLiteCommand($"SELECT (\"Login\") FROM \"BankAccounts\"", connect);
+                SQLiteDataReader reader = comandSQL.ExecuteReader();
+                while (reader.Read()) if ((string)reader["Login"] == information[0]) throw new Exception("Такой пользователь уже существует");
             }
             catch (Exception Error)
             {
                 Console.WriteLine($@"Ошибка : {Error.Message}
 Пожалуйста, повторите ввод");
                 Thread.Sleep(500);
-                information = InfInput();
+                information = InfInput(connect);
             }
             return information;
         }
@@ -92,11 +92,12 @@ Money    :   {reader["Money"]}");
             bool action = false;
             SQLiteConnection.CreateFile(@$"{directory}");
             string[] information;
-            Console.WriteLine($@"К сожалению, в пути {directory} не была найдена БД
-So нам нужно создать новую");
-            Console.WriteLine("Введите количество клиентов банка");
             do
             {
+                Console.Clear();
+                Console.WriteLine($@"К сожалению, в пути {directory} не была найдена БД
+So нам нужно создать новую");
+                Console.WriteLine("Введите количество клиентов банка");
                 try { if (!Int32.TryParse(Console.ReadLine(), out n) || n <= 0) throw new Exception("Неправильно введено количество клиентов"); action = false; }
                 catch (Exception Error) { Console.WriteLine($"Ошибка : {Error.Message} \nПовторите ввод"); action = true; }
             }
@@ -106,23 +107,20 @@ So нам нужно создать новую");
             for (int i = 0; i < n; i++)
             {
                 comandSQL.ExecuteNonQuery();
-                information = InfInput();
+                information = InfInput(connect);
                 comandSQL = new SQLiteCommand($"INSERT INTO \"BankAccounts\" (\"Login\", \"Password\", \"Money\") " + $"VALUES (\"{information[0]}\", \"{information[1]}\", {Convert.ToInt32(information[2])})", connect);
                 Console.Clear();
             }
             comandSQL.ExecuteNonQuery();
-            connect.Close();
         }
         static void Actions(SQLiteConnection connect, string Login)
         {
             int action = 0;
             bool act;
-            connect.Open();
             SQLiteCommand comandSQL = new SQLiteCommand($"SELECT (\"Money\") FROM \"BankAccounts\" WHERE \"Login\" = \"{Login}\"", connect);
             SQLiteDataReader reader = comandSQL.ExecuteReader();
             reader.Read();
             long money = (long)reader["Money"];
-            connect.Close();
             do
             {
                 Console.Clear();
@@ -162,7 +160,6 @@ So нам нужно создать новую");
                 try
                 {
                     if (!Int64.TryParse(Console.ReadLine(), out id)) throw new Exception("Неверный id");
-                    connect.Open();
                     comandSQL = new SQLiteCommand("SELECT (\"id\") FROM \"BankAccounts\"", connect);
                     reader = comandSQL.ExecuteReader();
                     while (reader.Read()) if (id == (long)reader["id"]) { act = false; break; } else act = true;
@@ -170,9 +167,8 @@ So нам нужно создать новую");
                     comandSQL.ExecuteNonQuery();
                     comandSQL = new SQLiteCommand($"SELECT (\"id\") FROM \"BankAccounts\" WHERE \"Login\" = {Login}", connect);
                     reader = comandSQL.ExecuteReader(); reader.Read();
-                    if (id == (long)reader["id"]) { reader.Close(); connect.Close(); throw new Exception("Неверный id, вы не можете перевести деньги самому себе"); }
+                    if (id == (long)reader["id"]) { reader.Close();  throw new Exception("Неверный id, вы не можете перевести деньги самому себе"); }
                     reader.Close();
-                    connect.Close();
                     if(act) throw new Exception("Неверный id");
                 }
                 catch (Exception Error)
@@ -188,15 +184,15 @@ So нам нужно создать новую");
             {
                 Console.Clear();
                 Console.WriteLine($"Введите id клиента : {id}");
-                Console.Write("Введите сумму для перевода : ");
+                Console.Write("Введите сумму для перевода (комиссия 1%) : ");
                 try
                 {
                     if (!Int64.TryParse(Console.ReadLine(), out summ)) throw new Exception("Невозможная сумма");
-                    connect.Open();
                     comandSQL = new SQLiteCommand($"SELECT (\"Money\") FROM \"BankAccounts\" WHERE \"Login\" = {Login}", connect);
                     reader = comandSQL.ExecuteReader(); reader.Read();
-                    if (summ > (long)reader["Money"]) { reader.Close(); connect.Close(); throw new Exception("У вас недостаточно средств"); }
+                    if (summ > (long)reader["Money"]) { reader.Close();  throw new Exception("У вас недостаточно средств"); }
                     act = false;
+                    
                 }
                 catch (Exception Error)
                 {
@@ -207,18 +203,23 @@ So нам нужно создать новую");
                 }
             }
             while (act);
-            comandSQL = new SQLiteCommand($"UPDATE \"BankAccounts\" set Money = {money - summ} WHERE Login = {Login}", connect);
+            comandSQL = new SQLiteCommand($"UPDATE \"BankAccounts\" set \"Money\" = {money - summ} WHERE \"Login\" = {Login}", connect);
             comandSQL.ExecuteNonQuery();
-            //connect.Close();
+            comandSQL = new SQLiteCommand($"SELECT (Money) FROM \"BankAccounts\" WHERE \"id\" = {id}", connect);
+            reader = comandSQL.ExecuteReader(); reader.Read(); money = (long)reader["Money"];
+            comandSQL = new SQLiteCommand($"UPDATE \"BankAccounts\" set \"Money\" = {summ + money - summ * 0.01F} WHERE \"id\" = {id}", connect);
+            comandSQL.ExecuteNonQuery();
         }
         static void Main(string[] args)
         {
-            string directory = "C:\\User\\!Kirill\\GitHub\\SQL_Classes\\Bank.db", Login = ""; //Директорию сам поменяешь
+            string directory = "C:\\User\\Bank.db", Login = ""; //Директорию сам поменяешь
             SQLiteConnection connect = new SQLiteConnection(@$"Data Source = {directory}; Version = 3");
             if (!File.Exists(directory)) IfNoBD(directory, connect);
+            else connect.Open();
             Log(connect, ref Login);
             Actions(connect, Login);
             AllOutput(connect);
+            connect.Close();
         }
     }
 }
