@@ -72,7 +72,7 @@ Money    :   {reader["Money"]}");
 Пример : Deezbec MyBirthday 2000");
                 information = Console.ReadLine().Split();
                 if (information.Length != 3) throw new Exception("Было введено не 3 значения");
-                if (!Int32.TryParse(information[2], out int x)) throw new Exception("Счёт не может состоять из букв");
+                if (!Int64.TryParse(information[2], out long x)) throw new Exception("Счёт не может состоять из букв");
                 SQLiteCommand comandSQL = new SQLiteCommand($"SELECT (\"Login\") FROM \"BankAccounts\"", connect);
                 SQLiteDataReader reader = comandSQL.ExecuteReader();
                 while (reader.Read()) if ((string)reader["Login"] == information[0]) throw new Exception("Такой пользователь уже существует");
@@ -108,7 +108,7 @@ So нам нужно создать новую");
             {
                 comandSQL.ExecuteNonQuery();
                 information = InfInput(connect);
-                comandSQL = new SQLiteCommand($"INSERT INTO \"BankAccounts\" (\"Login\", \"Password\", \"Money\") " + $"VALUES (\"{information[0]}\", \"{information[1]}\", {Convert.ToInt32(information[2])})", connect);
+                comandSQL = new SQLiteCommand($"INSERT INTO \"BankAccounts\" (\"Login\", \"Password\", \"Money\") " + $"VALUES (\"{information[0]}\", \"{information[1]}\", {Convert.ToInt64(information[2])})", connect);
                 Console.Clear();
             }
             comandSQL.ExecuteNonQuery();
@@ -152,7 +152,7 @@ So нам нужно создать новую");
             SQLiteCommand comandSQL;
             SQLiteDataReader reader;
             bool act = false;
-            long id = 0, summ = 0;
+            long summ = 0, id = 0;
             do
             {
                 Console.Clear();
@@ -187,7 +187,7 @@ So нам нужно создать новую");
                 Console.Write("Введите сумму для перевода (комиссия 1%) : ");
                 try
                 {
-                    if (!Int64.TryParse(Console.ReadLine(), out summ)) throw new Exception("Невозможная сумма");
+                    if (!long.TryParse(Console.ReadLine(), out summ) || summ < 0) throw new Exception("Невозможная сумма");
                     comandSQL = new SQLiteCommand($"SELECT (\"Money\") FROM \"BankAccounts\" WHERE \"Login\" = {Login}", connect);
                     reader = comandSQL.ExecuteReader(); reader.Read();
                     if (summ > (long)reader["Money"]) { reader.Close();  throw new Exception("У вас недостаточно средств"); }
@@ -207,7 +207,7 @@ So нам нужно создать новую");
             comandSQL.ExecuteNonQuery();
             comandSQL = new SQLiteCommand($"SELECT (Money) FROM \"BankAccounts\" WHERE \"id\" = {id}", connect);
             reader = comandSQL.ExecuteReader(); reader.Read(); money = (long)reader["Money"];
-            comandSQL = new SQLiteCommand($"UPDATE \"BankAccounts\" set \"Money\" = {summ + money - summ * 0.01F} WHERE \"id\" = {id}", connect);
+            comandSQL = new SQLiteCommand($"UPDATE \"BankAccounts\" set \"Money\" = {Math.Round(summ + money - summ * 0.01F)} WHERE \"id\" = {id}", connect);
             comandSQL.ExecuteNonQuery();
         }
         static void Main(string[] args)
@@ -217,8 +217,13 @@ So нам нужно создать новую");
             if (!File.Exists(directory)) IfNoBD(directory, connect);
             else connect.Open();
             Log(connect, ref Login);
-            Actions(connect, Login);
-            AllOutput(connect);
+            while(true)
+            {
+                Actions(connect, Login);
+                AllOutput(connect);
+                Console.Write("\nВсё? ");
+                if (Console.ReadLine().ToLower().Replace("l", "д").Replace("f", "а") == "да") break;
+            }
             connect.Close();
         }
     }
