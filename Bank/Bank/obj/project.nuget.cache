@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "2YZGFlKONTDhPktIHgr7Z2TASX8G84mnBFuIemJxQwPaHviBMlkHapITVODgemIDnij/Rsx0aoD+BRgRjV6LLw==",
+  "success": true,
+  "projectFilePath": "C:\\User\\!Kirill\\GitHub\\SQL_Classes\\Bank\\Bank\\Bank.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\grege\\.nuget\\packages\\system.data.sqlite\\1.0.112\\system.data.sqlite.1.0.112.nupkg.sha512",
+    "C:\\Users\\grege\\.nuget\\packages\\system.data.sqlite.core\\1.0.112\\system.data.sqlite.core.1.0.112.nupkg.sha512"
+  ],
+  "logs": []
+}
