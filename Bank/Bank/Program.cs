@@ -24,9 +24,9 @@ Money    :   {reader["Money"]}");
             reader.Close();
             connect.Close();
         }
-        static void Log(SQLiteConnection connect, ref string Login, ref string Password)
+        static void Log(SQLiteConnection connect, ref string Login)
         {
-            //string Login = "", Password;
+            string Password;
             SQLiteCommand comandSQL;
             SQLiteDataReader reader;
             bool Log = false, Pas = false;
@@ -98,7 +98,7 @@ So нам нужно создать новую");
             do
             {
                 try { if (!Int32.TryParse(Console.ReadLine(), out n) || n <= 0) throw new Exception("Неправильно введено количество клиентов"); action = false; }
-                catch (Exception Error) { Console.WriteLine($"Ошибка : {Error.Message} \n Повторите ввод"); action = true; }
+                catch (Exception Error) { Console.WriteLine($"Ошибка : {Error.Message} \nПовторите ввод"); action = true; }
             }
             while (action);
             connect.Open();
@@ -113,12 +113,112 @@ So нам нужно создать новую");
             comandSQL.ExecuteNonQuery();
             connect.Close();
         }
+        static void Actions(SQLiteConnection connect, string Login)
+        {
+            int action = 0;
+            bool act;
+            connect.Open();
+            SQLiteCommand comandSQL = new SQLiteCommand($"SELECT (\"Money\") FROM \"BankAccounts\" WHERE \"Login\" = \"{Login}\"", connect);
+            SQLiteDataReader reader = comandSQL.ExecuteReader();
+            reader.Read();
+            long money = (long)reader["Money"];
+            connect.Close();
+            do
+            {
+                Console.Clear();
+                Console.WriteLine($@"Добро пожаловать, {Login}
+Ваш баланс : {money}
+Вам доступны такие действия : 
+1 - Перевод денег");
+                try
+                {
+                    if (!Int32.TryParse(Console.ReadLine(), out action) || (action != 1)) throw new Exception("Неправильный ввод действия");
+                    act = false;
+                }
+                catch (Exception Error)
+                {
+                    Console.WriteLine($@"Ошибка : {Error.Message}
+Пожалуйста, повторите ввод");
+                    act = true;
+                    Thread.Sleep(500);
+                }
+            }
+            while (act) ;
+            switch (action)
+            {
+                case 1: Translation(connect, Login, money); break;
+            }
+        }
+        static void Translation(SQLiteConnection connect, string Login, long money)
+        {
+            SQLiteCommand comandSQL;
+            SQLiteDataReader reader;
+            bool act = false;
+            long id = 0, summ = 0;
+            do
+            {
+                Console.Clear();
+                Console.Write("Введите id клиента : ");
+                try
+                {
+                    if (!Int64.TryParse(Console.ReadLine(), out id)) throw new Exception("Неверный id");
+                    connect.Open();
+                    comandSQL = new SQLiteCommand("SELECT (\"id\") FROM \"BankAccounts\"", connect);
+                    reader = comandSQL.ExecuteReader();
+                    while (reader.Read()) if (id == (long)reader["id"]) { act = false; break; } else act = true;
+                    reader.Close();
+                    comandSQL.ExecuteNonQuery();
+                    comandSQL = new SQLiteCommand($"SELECT (\"id\") FROM \"BankAccounts\" WHERE \"Login\" = {Login}", connect);
+                    reader = comandSQL.ExecuteReader(); reader.Read();
+                    if (id == (long)reader["id"]) { reader.Close(); connect.Close(); throw new Exception("Неверный id, вы не можете перевести деньги самому себе"); }
+                    reader.Close();
+                    connect.Close();
+                    if(act) throw new Exception("Неверный id");
+                }
+                catch (Exception Error)
+                {
+                    Console.WriteLine($@"Ошибка : {Error.Message}
+Пожалуйста, повторите ввод");
+                    act = true;
+                    Thread.Sleep(500);
+                }
+            }
+            while (act) ;
+            do
+            {
+                Console.Clear();
+                Console.WriteLine($"Введите id клиента : {id}");
+                Console.Write("Введите сумму для перевода : ");
+                try
+                {
+                    if (!Int64.TryParse(Console.ReadLine(), out summ)) throw new Exception("Невозможная сумма");
+                    connect.Open();
+                    comandSQL = new SQLiteCommand($"SELECT (\"Money\") FROM \"BankAccounts\" WHERE \"Login\" = {Login}", connect);
+                    reader = comandSQL.ExecuteReader(); reader.Read();
+                    if (summ > (long)reader["Money"]) { reader.Close(); connect.Close(); throw new Exception("У вас недостаточно средств"); }
+                    act = false;
+                }
+                catch (Exception Error)
+                {
+                    Console.WriteLine($@"Ошибка : {Error.Message}
+Пожалуйста, повторите ввод");
+                    act = true;
+                    Thread.Sleep(500);
+                }
+            }
+            while (act);
+            comandSQL = new SQLiteCommand($"UPDATE \"BankAccounts\" set Money = {money - summ} WHERE Login = {Login}", connect);
+            comandSQL.ExecuteNonQuery();
+            //connect.Close();
+        }
         static void Main(string[] args)
         {
-            string directory = "C:\\User\\!Kirill\\GitHub\\SQL_Classes\\Bank.db", Login = "", Password = ""; //Дерикторию сам поменяешь
+            string directory = "C:\\User\\!Kirill\\GitHub\\SQL_Classes\\Bank.db", Login = ""; //Директорию сам поменяешь
             SQLiteConnection connect = new SQLiteConnection(@$"Data Source = {directory}; Version = 3");
             if (!File.Exists(directory)) IfNoBD(directory, connect);
-            Log(connect, ref Login, ref Password);
+            Log(connect, ref Login);
+            Actions(connect, Login);
+            AllOutput(connect);
         }
     }
 }
