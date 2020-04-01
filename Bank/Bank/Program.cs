@@ -165,7 +165,7 @@ So нам нужно создать новую");
                     while (reader.Read()) if (id == (long)reader["id"]) { act = false; break; } else act = true;
                     reader.Close();
                     comandSQL.ExecuteNonQuery();
-                    comandSQL = new SQLiteCommand($"SELECT (\"id\") FROM \"BankAccounts\" WHERE \"Login\" = {Login}", connect);
+                    comandSQL = new SQLiteCommand($"SELECT (\"id\") FROM \"BankAccounts\" WHERE (\"Login\") = \"{Login}\"", connect);
                     reader = comandSQL.ExecuteReader(); reader.Read();
                     if (id == (long)reader["id"]) { reader.Close();  throw new Exception("Неверный id, вы не можете перевести деньги самому себе"); }
                     reader.Close();
@@ -188,7 +188,7 @@ So нам нужно создать новую");
                 try
                 {
                     if (!long.TryParse(Console.ReadLine(), out summ) || summ < 0) throw new Exception("Невозможная сумма");
-                    comandSQL = new SQLiteCommand($"SELECT (\"Money\") FROM \"BankAccounts\" WHERE \"Login\" = {Login}", connect);
+                    comandSQL = new SQLiteCommand($"SELECT (\"Money\") FROM \"BankAccounts\" WHERE \"Login\" = \"{Login}\"", connect);
                     reader = comandSQL.ExecuteReader(); reader.Read();
                     if (summ > (long)reader["Money"]) { reader.Close();  throw new Exception("У вас недостаточно средств"); }
                     act = false;
@@ -203,7 +203,7 @@ So нам нужно создать новую");
                 }
             }
             while (act);
-            comandSQL = new SQLiteCommand($"UPDATE \"BankAccounts\" set \"Money\" = {money - summ} WHERE \"Login\" = {Login}", connect);
+            comandSQL = new SQLiteCommand($"UPDATE \"BankAccounts\" set \"Money\" = {money - summ} WHERE \"Login\" = \"{Login}\"", connect);
             comandSQL.ExecuteNonQuery();
             comandSQL = new SQLiteCommand($"SELECT (Money) FROM \"BankAccounts\" WHERE \"id\" = {id}", connect);
             reader = comandSQL.ExecuteReader(); reader.Read(); money = (long)reader["Money"];
