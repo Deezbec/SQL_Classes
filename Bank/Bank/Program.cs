@@ -212,7 +212,7 @@ So нам нужно создать новую");
         }
         static void Main(string[] args)
         {
-            string directory = "C:\\User\\Bank.db", Login = ""; //Директорию сам поменяешь
+            string directory = Path.Combine(Environment.CurrentDirectory, "Test.db"), Login = ""; //Директорию сам поменяешь
             SQLiteConnection connect = new SQLiteConnection(@$"Data Source = {directory}; Version = 3");
             if (!File.Exists(directory)) IfNoBD(directory, connect);
             else connect.Open();
