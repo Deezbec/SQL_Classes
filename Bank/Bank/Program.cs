@@ -118,8 +118,9 @@ So нам нужно создать новую");
             }
             comandSQL.ExecuteNonQuery();
         }
-        static void Actions(SQLiteConnection connect, ref long id)
+        static bool Actions(SQLiteConnection connect, ref long id)
         {
+            bool statement = false;
             int action = 0;
             bool act;
             SQLiteCommand comandSQL = new SQLiteCommand($"SELECT (\"Money\") FROM \"BankAccounts\" WHERE \"id\" = \"{id}\"", connect);
@@ -133,10 +134,11 @@ So нам нужно создать новую");
 Ваш баланс : {money}
 Вам доступны такие действия : 
 1 - Перевод денег
-2 - выход из аккаунта");
+2 - выход из аккаунта
+3 - выход из программы");
                 try
                 {
-                    if (!Int32.TryParse(Console.ReadLine(), out action) || (action != 1 && action != 2)) throw new Exception("Неправильный ввод действия");
+                    if (!Int32.TryParse(Console.ReadLine(), out action) || (action != 1 && action != 2 && action != 3)) throw new Exception("Неправильный ввод действия");
                     act = false;
                 }
                 catch (Exception Error)
@@ -152,7 +154,9 @@ So нам нужно создать новую");
             {
                 case 1: Translation(connect, id, money); break;
                 case 2: Log(connect, out id); Actions(connect, ref id); break;
+                case 3: statement = true; break;
             }
+            return statement;
         }
         static void Translation(SQLiteConnection connect, long idMain, long money)
         {
@@ -231,9 +235,10 @@ So нам нужно создать новую");
             Log(connect, out id);
             while(true)
             {
-                Actions(connect, ref id);
+                bool statement = Actions(connect, ref id);
                 Console.Write("\nВсё? ");
                 if (Console.ReadLine().ToLower().Replace("l", "д").Replace("f", "а") == "да") break;
+                if (statement) break;
             }
             Console.Clear();
             Console.WriteLine("Время занимательной статистики : ");
@@ -269,6 +274,7 @@ So нам нужно создать новую");
             Console.ReadKey(); Console.Clear();
             Console.WriteLine("Вот данные всех пользователей : ");
             AllOutput(connect);
+            Console.ReadKey();
             connect.Close();
         }
     }
