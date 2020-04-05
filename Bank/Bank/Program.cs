@@ -216,8 +216,8 @@ So нам нужно создать новую");
             reader = comandSQL.ExecuteReader(); reader.Read(); money = (long)reader["Money"];
             comandSQL = new SQLiteCommand($"UPDATE \"BankAccounts\" set \"Money\" = {Math.Round(summ + money - summ * 0.01F)} WHERE \"id\" = {id}", connect);
             comandSQL.ExecuteNonQuery();
-            //comandSQL = new SQLiteCommand($"INSERT INTO \"Trans\" (\"id\", \"Money\") VALUES (\"{idMain}\", {summ * (-1)})", connect);
-            //comandSQL.ExecuteNonQuery();
+            comandSQL = new SQLiteCommand($"INSERT INTO \"Trans\" (\"id\", \"Money\") VALUES (\"{idMain}\", {summ * (-1)})", connect);
+            comandSQL.ExecuteNonQuery();
             comandSQL = new SQLiteCommand($"INSERT INTO \"Trans\" (\"id\", \"Money\") VALUES (\"{id}\", {Math.Round(summ - summ * 0.01F)})", connect);
             comandSQL.ExecuteNonQuery();
         }
@@ -236,7 +236,7 @@ So нам нужно создать новую");
                 if (Console.ReadLine().ToLower().Replace("l", "д").Replace("f", "а") == "да") break;
             }
             Console.Clear();
-            Console.WriteLine("Время занимательной статистики : \n");
+            Console.WriteLine("Время занимательной статистики : ");
             SQLiteCommand comandSQL;
             SQLiteDataReader reader;
             comandSQL = new SQLiteCommand($"SELECT * FROM \"BankAccounts\"", connect); reader = comandSQL.ExecuteReader();
@@ -246,25 +246,28 @@ So нам нужно создать новую");
             comandSQL = new SQLiteCommand($"SELECT * FROM \"BankAccounts\"", connect); reader = comandSQL.ExecuteReader();
             while (reader.Read()) { Names[k] = (string)reader["Login"]; k++; }
             reader.Close();
-            Console.WriteLine("Заработки : ");
+            Console.WriteLine("\nЗаработки : \n");
             for (int i = 1; i <= n; i++)
             {
-                comandSQL = new SQLiteCommand($"SELECT SUM(\"Money\") as \"income\" FROM \"Trans\" WHERE \"id\" = {i}", connect);
+                comandSQL = new SQLiteCommand($"SELECT SUM(\"Money\") as \"income\" FROM \"Trans\" WHERE \"id\" = {i} AND \"Money\" > 0", connect);
                 reader = comandSQL.ExecuteReader(); reader.Read();
-                Console.WriteLine($"{Names[i - 1]} получил : {reader["income"]}");
+                Console.WriteLine($"{Names[i - 1]} получил : \t{reader["income"]}");
                 reader.Close();
                 comandSQL.ExecuteNonQuery();
             }
-            /*Console.WriteLine("\nУбытки : ");
+            Console.WriteLine("\nУбытки : \n");
             for (int i = 1; i <= n; i++)
             {
-                comandSQL = new SQLiteCommand($"SELECT SUM(\"Money\") as \"income\" FROM \"Trans\" WHERE \"id\" = {i} AND \"Money < 0\"", connect);
+                comandSQL = new SQLiteCommand($"SELECT SUM(\"Money\") as \"income\" FROM \"Trans\" WHERE \"id\" = {i} AND \"Money\" < 0", connect);
                 reader = comandSQL.ExecuteReader(); reader.Read();
-                Console.WriteLine($"{Names[i - 1]} отдал : {reader["income"]}");
+                try { Console.WriteLine($"{Names[i - 1]} отдал : \t{(long)reader["income"] * (-1)}"); }
+                catch { Console.WriteLine($"{Names[i - 1]} отдал : \t{reader["income"]}"); }
                 reader.Close();
                 comandSQL.ExecuteNonQuery();
-            }*/
-            Console.WriteLine("\nВот данные всех пользователей : ");
+            }
+            Console.WriteLine("Нажмите любую кнопку для продолжения");
+            Console.ReadKey(); Console.Clear();
+            Console.WriteLine("Вот данные всех пользователей : ");
             AllOutput(connect);
             connect.Close();
         }
